@@ -10,7 +10,7 @@ app.use(cors());
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173", // Your Vite default port
+    origin: "http://localhost:5173",
     methods: ["GET", "POST"],
   },
 });
@@ -21,10 +21,8 @@ const activeUsers = new Map();
 io.on("connection", (socket) => {
   console.log(`User connected: ${socket.id}`);
 
-  // Extract the real username passed from React
   const realUsername = socket.handshake.auth.username || "Anonymous";
 
-  // 2. MUST use .set() for Maps
   activeUsers.set(socket.id, {
     id: socket.id,
     username: realUsername,
@@ -33,7 +31,6 @@ io.on("connection", (socket) => {
     y: 300,
   });
 
-  // 3. MUST use Array.from() and .get()
   socket.emit("currentUsers", Array.from(activeUsers.values()));
   socket.broadcast.emit("newUser", activeUsers.get(socket.id));
 
@@ -48,9 +45,8 @@ io.on("connection", (socket) => {
   socket.on("sendChatMessage", (text) => {
     const user = activeUsers.get(socket.id);
     if (user) {
-      // Broadcast the message to everyone, including the sender
       io.emit("receiveChatMessage", {
-        id: Date.now(), // unique ID for React keys
+        id: Date.now(),
         sender: user.username,
         text: text,
       });
@@ -58,7 +54,7 @@ io.on("connection", (socket) => {
   });
   socket.on("disconnect", () => {
     console.log(`User disconnected: ${socket.id}`);
-    activeUsers.delete(socket.id); // 4. MUST use .delete()
+    activeUsers.delete(socket.id);
     io.emit("userDisconnected", socket.id);
   });
 });

@@ -6,9 +6,8 @@ function Chat({ socketRef, messages }) {
   const handleSendMessage = (e) => {
     e.preventDefault();
     if (inputText.trim() !== "" && socketRef.current) {
-      // Send the text to the backend!
       socketRef.current.emit("sendChatMessage", inputText);
-      setInputText(""); // Clear the input field
+      setInputText("");
     }
   };
 

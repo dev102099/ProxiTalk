@@ -81,7 +81,7 @@ function Cosmos({
       // 3. Now we are safely listening and won't miss the server's first message
       // 3. Now we are safely listening
       socketRef.current.on("currentUsers", (users) => {
-        console.log("📡 CURRENT USERS DATA:", users);
+        console.log("CURRENT USERS DATA:", users);
         setActiveUsersList(users); // <--- Add to React State
 
         users.forEach((user) => {
@@ -99,8 +99,8 @@ function Cosmos({
       });
 
       socketRef.current.on("newUser", (user) => {
-        console.log("🚨 NEW USER ARRIVED:", user);
-        setActiveUsersList((prev) => [...prev, user]); // <--- Add to React State
+        console.log("NEW USER ARRIVED:", user);
+        setActiveUsersList((prev) => [...prev, user]);
 
         const avatar = createAvatar(user.username, user.color, user.x, user.y);
         networkPlayers[user.id] = avatar;
@@ -117,20 +117,16 @@ function Cosmos({
       });
       socketRef.current.off("receiveChatMessage");
 
-      // 2. Add the fresh listener
       socketRef.current.on("receiveChatMessage", (newMessage) => {
         setMessages((prevMessages) => {
-          // 3. The Ultimate Safeguard:
-          // Since the backend assigns a unique Date.now() ID to every message,
-          // we check if a message with this exact ID is already in our array.
           if (prevMessages.some((msg) => msg.id === newMessage.id)) {
-            return prevMessages; // If it is, ignore the duplicate!
+            return prevMessages;
           }
-          return [...prevMessages, newMessage]; // Otherwise, add it safely.
+          return [...prevMessages, newMessage];
         });
       });
       socketRef.current.on("userDisconnected", (userId) => {
-        setActiveUsersList((prev) => prev.filter((u) => u.id !== userId)); // <--- Remove from React State
+        setActiveUsersList((prev) => prev.filter((u) => u.id !== userId));
 
         if (networkPlayers[userId]) {
           app.stage.removeChild(networkPlayers[userId]);
@@ -138,10 +134,9 @@ function Cosmos({
           delete networkPlayers[userId];
         }
       });
-      // --- MOVEMENT LOOP ---
-      // --- MOVEMENT & BROADCAST LOOP ---
+
       const speed = 5;
-      const CHAT_RADIUS = 150; // How close they need to be (in pixels)
+      const CHAT_RADIUS = 150;
 
       app.ticker.add(() => {
         let dx = 0;
@@ -162,10 +157,8 @@ function Cosmos({
           });
         }
 
-        // --- NEW: PROXIMITY DETECTION ---
         let anyoneClose = false;
 
-        // Loop through all the other players currently on the screen
         for (const id in networkPlayers) {
           const otherPlayer = networkPlayers[id];
 
@@ -176,14 +169,13 @@ function Cosmos({
 
           if (distance < CHAT_RADIUS) {
             anyoneClose = true;
-            break; // We found someone, no need to check the rest!
+            break;
           }
         }
 
-        // Only trigger a React update if the state actually changed!
         if (anyoneClose !== chatStateRef.current) {
-          chatStateRef.current = anyoneClose; // Update our buffer
-          setIsChatConnected(anyoneClose); // Update the actual React UI
+          chatStateRef.current = anyoneClose;
+          setIsChatConnected(anyoneClose);
         }
       });
     };
@@ -197,7 +189,7 @@ function Cosmos({
       if (app) app.destroy(true, { children: true });
       if (pixiContainerRef.current) pixiContainerRef.current.innerHTML = "";
     };
-  }, [hasJoined, usernameInput]); // Triggers only when they join
+  }, [hasJoined, usernameInput]);
 
   // --- RENDER UI ---
 
@@ -238,8 +230,7 @@ function Cosmos({
         isChatConnected ? "w-[70%]" : "w-full"
       }`}
     >
-      {/* Pixi Canvas injects here */}
-      {/* --- NEW: FLOATING ACTIVE USERS PANEL --- */}
+      {/* --- FLOATING ACTIVE USERS PANEL --- */}
       <div className="absolute top-4 left-4 bg-gray-900/90 border border-gray-700 rounded-lg p-4 z-10 shadow-2xl min-w-[200px]">
         <h3 className="text-white text-sm font-bold border-b border-gray-700 pb-2 mb-3 flex items-center justify-between">
           Active Cosmos

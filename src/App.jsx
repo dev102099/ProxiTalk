@@ -5,9 +5,8 @@ import Chat from "./components/Chat";
 
 function App() {
   const [isChatConnected, setIsChatConnected] = useState(false);
-  const [messages, setMessages] = useState([]); // Array to hold chat history
+  const [messages, setMessages] = useState([]);
 
-  // Lift the socket reference here so BOTH components can use it!
   const socketRef = useRef(null);
 
   return (
